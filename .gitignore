@@ -1,0 +1,6 @@
+# File to ignore
+*.png
+*.mp4
+
+# Files to allow
+!examples/example*.png
