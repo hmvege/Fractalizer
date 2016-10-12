@@ -127,7 +127,11 @@ class CurliecueFractal:
 
 	def create_movie(self, folder_name, filename_extension):
 		print 'Creating movie'
+		
 		subprocess.call('ffmpeg -framerate 24 -i %s%s_%%04d.png -c:v libx264 -r 24 %s.mp4' % (folder_name, filename_extension, filename_extension), shell=True)
+		# If this fails, use:
+		# ffmpeg -framerate 24 -pattern_type glob -i "*.png" -c:v libx264 -r 24 transformation_pi_1e-5.mp4
+		
 		# print 'Deleting used folder with pictures: %s' % folder_name
 		# shutil.rmtree(folder_name)
 		print 'Movie %s created' % filename_extension
@@ -164,9 +168,16 @@ class CurliecueFractal:
 		print 'Creating plots:'
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
-		# ax.set_xlim(-1e8*0.5,1e8*0.5)
-		# ax.set_ylim(-1e8*0.5,1e8*0.5)
+
 		fractal, = ax.plot(x_matrix[-1],y_matrix[-1],color='white') # Gets the line2d instance to update
+
+		# Plot window settings
+		plot_window_tolerance = 1.2 # Changes how much extra space we will view the window
+		new_xlim = np.max(np.abs(ax.get_xlim()))
+		new_ylim = np.max(np.abs(ax.get_ylim()))
+		ax.set_xlim(-new_xlim*plot_window_tolerance, new_xlim*plot_window_tolerance)
+		ax.set_ylim(-new_ylim*plot_window_tolerance, new_ylim*plot_window_tolerance)
+
 		fractal.set_color('black')
 
 		for i in xrange(total_frames):		
@@ -193,18 +204,16 @@ class CurliecueFractal:
 			self._create_gif(folder_name, run_name)
 
 
-N = 100000
+N = 10000
 
 # s_transformation = CurliecueFractal(N,1)
-# s_transformation.transform(np.sqrt(2),scp.golden,100,'transformation2')
-
+# s_transformation.transform(np.pi-1e-5, np.pi+1e-5, 10000, 'transformation_pi_1e-5',movie=True)
 
 # s_transformation2 = CurliecueFractal(N,1)
 # s_transformation2.transform(scp.golden-1e-9,scp.golden,1000,'transformation3',movie=True)
 
-
-s_transformation2 = CurliecueFractal(N,1)
-s_transformation2.transform(np.pi - 1e-8, np.pi + 1e-8, 1000, 'transformation1', movie=True)
+# s_transformation2 = CurliecueFractal(N,1)
+# s_transformation2.transform(np.pi - 1e-4, np.pi + 1e-4, 10000, 'transformation1', movie=True)
 
 # s_pi = CurliecueFractal(N,np.pi)
 # s_pi.plot_fractal('pi','\pi')
@@ -226,7 +235,7 @@ s_transformation2.transform(np.pi - 1e-8, np.pi + 1e-8, 1000, 'transformation1',
 # s_sqrt2.plot_fractal('sqrt2','\sqrt{2}')
 # s_sqrt2.create_animation(gif_fps=60)
 
-# Euler_Mascheroni = 0.57721566490153286060651209008240243104215933593992
+# Euler_Mascheroni = 0.5772156649015328606
 # s_Euler_Mascheroni = CurliecueFractal(N, Euler_Mascheroni)
 # s_Euler_Mascheroni.plot_fractal('Euler_Mascheroni','\gamma')
 # s_Euler_Mascheroni.create_animation(gif_fps=60)
