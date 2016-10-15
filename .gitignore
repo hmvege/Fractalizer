@@ -2,5 +2,9 @@
 *.png
 *.mp4
 
+# MacOS junk files
+.DS_Store
+
 # Files to allow
 !examples/example*.png
+!examples/example*.mp4
