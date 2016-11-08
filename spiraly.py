@@ -1,4 +1,5 @@
 # PLOTTING CURLICUE FRACTAL
+# Please run with python 2.7.10
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +11,8 @@ import shutil
 import multiprocessing
 
 def CurlieCueParallel(input_values):
-	s, n = input_values
+	# Data-retrieval function that can be run in parallel
+	s, n, job_index, number_of_indexes = input_values
 	r = np.linspace(0,n-1,n)
 	x = np.zeros(n)
 	y = np.zeros(n)
@@ -30,36 +32,30 @@ def CurlieCueParallel(input_values):
 		x[i] = x[i-1] + r[i-1]*np.cos(phi[i-1])
 		y[i] = y[i-1] + r[i-1]*np.sin(phi[i-1])
 
+	############ Progressbar for multiprocessing ############
+	# if int(multiprocessing.current_process().name[-1]) == 1:
+		# status = r'%3.2f%%' % job_index/float(number_of_indexes)*100
+		# status += chr(8)*(len(status)+1)
+		# print status,
+		# sys.stdout.write('\r')
+		# sys.stdout.write('%6.2f%%' % job_index/float(number_of_indexes))
+		# sys.stdout.flush()
+
 	return x, y, iteration_array
 
-def PlotParallel(plot_settings):
-	# Prepearing to parellize plotting
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-
-	fractal, = ax.plot(x_matrix[-1],y_matrix[-1],color='white') # Gets the line2d instance to update
-
+def PlotParallel(plot_input_values):
+	# Function for plotting that can be run in parallel
+	x_matrix, y_matrix, i, plot_config = plot_input_values
+	new_xlim, new_ylim, folder_name, run_name = plot_config
+	plt.cla()
+	plt.plot(x_matrix,y_matrix,color="black")
 	# Plot window settings
-	plot_window_tolerance = 1.2 # Changes how much extra space we will view the window
-	new_xlim = np.max(np.abs(ax.get_xlim()))
-	new_ylim = np.max(np.abs(ax.get_ylim()))
+	plt.xlim(-new_xlim, new_xlim)
+	plt.ylim(-new_ylim, new_ylim)
 
-	ax.set_xlim(-new_xlim*plot_window_tolerance, new_xlim*plot_window_tolerance)
-	ax.set_ylim(-new_ylim*plot_window_tolerance, new_ylim*plot_window_tolerance)
-	fractal.set_color('black')
-
-	for i in xrange(total_frames):
-		#Updates plot data
-		fractal.set_xdata(x_matrix[i])
-		fractal.set_ydata(y_matrix[i])
-		
-		# Draws new figure. Old figure is automatically removed?
-		fig.canvas.draw()
-
-		# Saves figure in folder
-		filename = '%s%s_%04d.png' % (folder_name, run_name, i)
-		fig.savefig(filename)
-
+	# Saves figure in folder
+	filename = '%s%s_%04d.png' % (folder_name, run_name, i)
+	plt.savefig(filename)
 
 class CurliecueFractal:
 	def __init__(self,n,s):
@@ -227,13 +223,13 @@ class CurliecueFractal:
 		print 'Retrieving data:'
 
 		# Parallelized data retrieval
-		input_values = zip(s_values,[self.n for i in range(len(s_values))])
+		input_values = zip(s_values, [self.n for i in xrange(total_frames)], range(total_frames), [total_frames for i in xrange(total_frames)])
 		pool = multiprocessing.Pool(processes=4)
-		results = pool.map(CurlieCueParalell,input_values)
+		results = pool.map(CurlieCueParallel,input_values)
 
 		for i in xrange(len(results)):
 			x_matrix[i], y_matrix[i] = results[i][:2]
-
+		sys.exit('Exiting due to testing')
 		# # Unparallelized method
 		# for i in xrange(len(s_values)):
 		# 	x, y, iteration_array = self._create_values(s_values[i], set_variables = False)
@@ -246,7 +242,42 @@ class CurliecueFractal:
 
 		print 'Data retrieval complete.'
 
-		# Plotting and creating files ===========
+		# Old, non-parallelized method
+		# # Plotting and creating files ===========
+		# print 'Creating plots:'
+		# fig = plt.figure()
+		# ax = fig.add_subplot(111)
+
+		# fractal, = ax.plot(x_matrix[-1],y_matrix[-1],color='white') # Gets the line2d instance to update
+
+		# # # Plot window settings
+		# plot_window_tolerance = 1.2 # Changes how much extra space we will view the window
+		# new_xlim = np.max(np.abs(ax.get_xlim())) * plot_window_tolerance
+		# new_ylim = np.max(np.abs(ax.get_ylim())) * plot_window_tolerance
+
+		# ax.set_xlim(-new_xlim, new_xlim)
+		# ax.set_ylim(-new_ylim, new_ylim)
+		# fractal.set_color('black')
+
+		# for i in xrange(total_frames):
+		# 	#Updates plot data
+		# 	fractal.set_xdata(x_matrix[i])
+		# 	fractal.set_ydata(y_matrix[i])
+			
+		# 	# Draws new figure. Old figure is automatically removed?
+		# 	fig.canvas.draw()
+
+		# 	# Saves figure in folder
+		# 	filename = '%s%s_%04d.png' % (folder_name, run_name, i)
+		# 	fig.savefig(filename)
+
+		# 	status = r'%3.2f%%' % (i/float(total_frames)*100)
+		# 	status += chr(8)*(len(status)+1)
+		# 	print status,
+
+		# print 'Plot creation complete.'
+
+		# Plotting and creating files - PARALLIZED ======================
 		print 'Creating plots:'
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
@@ -255,28 +286,14 @@ class CurliecueFractal:
 
 		# Plot window settings
 		plot_window_tolerance = 1.2 # Changes how much extra space we will view the window
-		new_xlim = np.max(np.abs(ax.get_xlim()))
-		new_ylim = np.max(np.abs(ax.get_ylim()))
+		new_xlim = np.max(np.abs(ax.get_xlim()))*plot_window_tolerance
+		new_ylim = np.max(np.abs(ax.get_ylim()))*plot_window_tolerance
 
-		ax.set_xlim(-new_xlim*plot_window_tolerance, new_xlim*plot_window_tolerance)
-		ax.set_ylim(-new_ylim*plot_window_tolerance, new_ylim*plot_window_tolerance)
-		fractal.set_color('black')
+		plot_config = [new_xlim, new_ylim, folder_name, run_name]
+		plot_input_values = zip(x_matrix, y_matrix, range(total_frames), [plot_config for i in xrange(total_frames)])
 
-		for i in xrange(total_frames):
-			#Updates plot data
-			fractal.set_xdata(x_matrix[i])
-			fractal.set_ydata(y_matrix[i])
-			
-			# Draws new figure. Old figure is automatically removed?
-			fig.canvas.draw()
-
-			# Saves figure in folder
-			filename = '%s%s_%04d.png' % (folder_name, run_name, i)
-			fig.savefig(filename)
-
-			status = r'%3.2f%%' % (i/float(total_frames)*100)
-			status += chr(8)*(len(status)+1)
-			print status,
+		pool = multiprocessing.Pool(processes=4)
+		results = pool.map(PlotParallel, plot_input_values)
 
 		print 'Plot creation complete.'
 
@@ -286,7 +303,7 @@ class CurliecueFractal:
 			self._create_gif(folder_name, run_name)
 
 
-N = 1000
+N = 100
 
 # s_transformation = CurliecueFractal(N,1)
 # s_transformation.transform(np.pi-1e-5, np.pi+1e-5, 10000, 'transformation_pi_1e-5',movie=True)
@@ -299,7 +316,7 @@ N = 1000
 
 
 s_transformation_test = CurliecueFractal(N,1)
-s_transformation_test.transform(np.pi - 1e-4, np.pi + 1e-4, 1000, 'transformation_test', movie=True)
+s_transformation_test.transform(np.pi - 1e-4, np.pi + 1e-4, 16, 'transformation_test', movie=True)
 
 
 # s_pi = CurliecueFractal(N,np.pi)
