@@ -2,6 +2,7 @@
 *.png
 *.mp4
 *.gif
+*.eps
 
 # MacOS junk files
 .DS_Store

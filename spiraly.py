@@ -102,10 +102,11 @@ class CurliecueFractal:
 
 		self.s_value_string, self.filename_extension = s_value_string, filename_extension
 
+		# plt.figure(figsize=(70,70)) # Is this usable?
 		plt.plot(x,y,color='black')
 		plt.title(r'Curliecue Fractal, $s=%s$, $n=%s$' % (s_value_string,self.n))
 		plt.axis('equal')
-		plt.savefig('curliecue_fractaly_s%s.png' % filename_extension, dpi=600)
+		plt.savefig('curliecue_fractaly_s%s.eps' % filename_extension, format='eps', dpi=400)
 		plt.close()
 
 	def create_animation(self, gif_fps = False):
@@ -229,7 +230,7 @@ class CurliecueFractal:
 
 		for i in xrange(len(results)):
 			x_matrix[i], y_matrix[i] = results[i][:2]
-		sys.exit('Exiting due to testing')
+
 		# # Unparallelized method
 		# for i in xrange(len(s_values)):
 		# 	x, y, iteration_array = self._create_values(s_values[i], set_variables = False)
@@ -303,7 +304,7 @@ class CurliecueFractal:
 			self._create_gif(folder_name, run_name)
 
 
-N = 100
+N = 1e7
 
 # s_transformation = CurliecueFractal(N,1)
 # s_transformation.transform(np.pi-1e-5, np.pi+1e-5, 10000, 'transformation_pi_1e-5',movie=True)
@@ -315,8 +316,8 @@ N = 100
 # s_transformation2.transform(np.pi - 1e-4, np.pi + 1e-4, 10000, 'transformation1', movie=True)
 
 
-s_transformation_test = CurliecueFractal(N,1)
-s_transformation_test.transform(np.pi - 1e-4, np.pi + 1e-4, 16, 'transformation_test', movie=True)
+# s_transformation3 = CurliecueFractal(N,1)
+# s_transformation3.transform(np.exp(1) - 1e-4, np.exp(1) + 1e-4, 10000, 'transformation_euler', movie=True)
 
 
 # s_pi = CurliecueFractal(N,np.pi)
@@ -331,8 +332,8 @@ s_transformation_test.transform(np.pi - 1e-4, np.pi + 1e-4, 16, 'transformation_
 # s_ln2.plot_fractal('natural_log2','\ln 2')
 # s_ln2.create_animation(gif_fps=60)
 
-# s_euler = CurliecueFractal(N,np.exp(1))
-# s_euler.plot_fractal('eulers_number','e')
+s_euler = CurliecueFractal(N,np.exp(1))
+s_euler.plot_fractal('eulers_number','e')
 # s_euler.create_animation(gif_fps=60)
 
 # s_sqrt2 = CurliecueFractal(N,np.sqrt(2))
