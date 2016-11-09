@@ -304,7 +304,7 @@ class CurliecueFractal:
 			self._create_gif(folder_name, run_name)
 
 
-N = 1e7
+N = 1e6
 
 # s_transformation = CurliecueFractal(N,1)
 # s_transformation.transform(np.pi-1e-5, np.pi+1e-5, 10000, 'transformation_pi_1e-5',movie=True)
