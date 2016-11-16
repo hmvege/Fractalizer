@@ -197,6 +197,8 @@ class CurliecueFractal:
 		subprocess.call('ffmpeg -framerate 24 -i %s%s_%%04d.png -c:v libx264 -r 24 %s.mp4' % (folder_name, filename_extension, filename_extension), shell=True)
 		# If this fails, use:
 		# ffmpeg -framerate 24 -pattern_type glob -i "*.png" -c:v libx264 -r 24 transformation_pi_1e-5.mp4
+		# "ffmpeg -r 30 -i %s%s_%%04d.png -codec:v mpeg4 -flags:v +qscale -global_quality:v 0 -codec:a libmp3lame -r 24 %s.mp4"
+
 		
 		# print 'Deleting used folder with pictures: %s' % folder_name
 		# shutil.rmtree(folder_name)
